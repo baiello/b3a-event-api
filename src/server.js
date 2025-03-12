@@ -60,6 +60,25 @@ app.get('/events/:id', async (req, res) => {
     }
 });
 
+// Endpoint delete one event
+app.delete('/events/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const event = await prisma.event.delete({
+            where: {
+                id: parseInt(id),
+            }
+        });
+
+        return (!event)
+            ? res.status(404).json({ "error": "Resource not found" })
+            : res.status(204).send(); // 204 => No content
+    } catch (error) {
+        return res.status(500).json({ "error": error.message});
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);
 });
