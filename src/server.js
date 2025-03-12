@@ -6,7 +6,7 @@ const PORT = 3000;
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(express.json()) // for parsing application/json
+app.use(express.json()); // for parsing application/json
 
 // Endpoint to create one event
 app.post('/events', async (req, res) => {
@@ -60,7 +60,33 @@ app.get('/events/:id', async (req, res) => {
     }
 });
 
-// Endpoint delete one event
+// Endpoint to update one event
+app.put('/events/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { title, description, date } = req.body;
+
+        const event = await prisma.event.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                title: title,
+                description: description,
+                date: date && (new Date(date)).toISOString(),
+            }
+        });
+
+        return (!event)
+            ? res.status(404).json({ "error": "Resource not found" })
+            : res.status(200).json(event);
+    } catch (error) {
+        return res.status(500).json({ "error": error.message});
+    }
+});
+
+// Endpoint to delete one event
 app.delete('/events/:id', async (req, res) => {
     try {
         const { id } = req.params;
