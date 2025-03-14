@@ -1,43 +1,18 @@
 const { PrismaClient } = require("@prisma/client");
 const express = require("express");
-const { z } = require('zod')
+const { z } = require('zod');
+
+const { requestsLogging, validateEventCreationInput } = require('./midlewares.js');
 
 const PORT = 3000;
 
 const app = express();
 const prisma = new PrismaClient();
 
-/* -------------------------------------------
- * ZOD SCHEMAS
- * ------------------------------------------- */
-
-const EventCreation = z.object({
-    title: z.string().min(3).trim(),
-    description: z.string().min(10).trim(),
-    date: z.string().datetime(),
-});
-
 
 /* -------------------------------------------
- * CUSTOM MIDDLEWARES
+ * APP MIDDLEWARES
  * ------------------------------------------- */
-
-function requestsLogging(req, res, next) {
-    const requestStartDate = new Date();
-
-    res.once("finish", () => {
-        const requestHandlingTime = new Date() - requestStartDate;
-        console.log(`[${requestStartDate.toISOString()}] ${req.method} ${req.url} - ${requestHandlingTime}ms`);
-    });
-
-    next();
-}
-
-function validateEventCreationInput(req, res, next) {
-    EventCreation.parse(req.body);
-    next();
-}
-
 
 app.use(express.json()); // for parsing application/json
 app.use(requestsLogging);
@@ -145,6 +120,8 @@ app.delete('/events/:id', async (req, res) => {
  * ------------------------------------------- */
 
 app.use((err, req, res, next) => {
+    console.log(err);
+
     if (err instanceof z.ZodError) {
         const zodErrors = err.issues.map(item => ({ message: `${item.path[0]}: ${item.message}`}))
         return res.status(400).json({ errors: zodErrors});
