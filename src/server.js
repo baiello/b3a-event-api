@@ -4,7 +4,9 @@ const { z } = require('zod');
 const eventsController = require('./controllers/eventsController.js');
 const usersController = require('./controllers/usersController.js');
 
+const authMiddleware = require("./middlewares/authMiddleware.js");
 const { requestsLogging } = require('./midlewares.js');
+
 
 const PORT = 3000;
 
@@ -15,11 +17,12 @@ const app = express();
  * APP MIDDLEWARES
  * ------------------------------------------- */
 
-app.use(express.json()); // for parsing application/json
 app.use(requestsLogging);
+app.use(express.json()); // for parsing application/json
 
 
-app.use('/events', eventsController);
+
+app.use('/events', authMiddleware, eventsController);
 app.use('/users', usersController);
 
 
