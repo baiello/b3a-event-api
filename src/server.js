@@ -1,10 +1,26 @@
+const { PrismaClient } = require("@prisma/client");
 const express = require("express");
-const { PrismaClient } = require("@prisma/client")
+const { z } = require('zod')
 
 const PORT = 3000;
 
 const app = express();
 const prisma = new PrismaClient();
+
+/* -------------------------------------------
+ * ZOD SCHEMAS
+ * ------------------------------------------- */
+
+const EventCreation = z.object({
+    title: z.string().min(3).trim(),
+    description: z.string().min(10).trim(),
+    date: z.string().datetime(),
+});
+
+
+/* -------------------------------------------
+ * CUSTOM MIDDLEWARES
+ * ------------------------------------------- */
 
 function requestsLogging(req, res, next) {
     const requestStartDate = new Date();
@@ -17,17 +33,24 @@ function requestsLogging(req, res, next) {
     next();
 }
 
+function validateEventCreationInput(req, res, next) {
+    EventCreation.parse(req.body);
+    next();
+}
+
+
 app.use(express.json()); // for parsing application/json
 app.use(requestsLogging);
 
+
+/* -------------------------------------------
+ * ENDPOINTS
+ * ------------------------------------------- */
+
 // Endpoint to create one event
-app.post('/events', async (req, res) => {
+app.post('/events', validateEventCreationInput, async (req, res) => {
     try {
         const { title, description, date } = req.body;
-
-        if (!title || !description || !date) {
-            throw new Error("Input is missing");
-        }
 
         const event = await prisma.event.create({
             data: {
@@ -116,6 +139,19 @@ app.delete('/events/:id', async (req, res) => {
         return res.status(500).json({ "error": error.message});
     }
 });
+
+/* -------------------------------------------
+ * MISC
+ * ------------------------------------------- */
+
+app.use((err, req, res, next) => {
+    if (err instanceof z.ZodError) {
+        const zodErrors = err.issues.map(item => ({ message: `${item.path[0]}: ${item.message}`}))
+        return res.status(400).json({ errors: zodErrors});
+    }
+
+    return res.status(500).send('Something broke!');
+})
 
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`);
