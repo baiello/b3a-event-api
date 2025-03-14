@@ -2,6 +2,8 @@ const express = require("express");
 const { z } = require('zod');
 
 const eventsController = require('./controllers/eventsController.js');
+const usersController = require('./controllers/usersController.js');
+
 const { requestsLogging } = require('./midlewares.js');
 
 const PORT = 3000;
@@ -18,6 +20,7 @@ app.use(requestsLogging);
 
 
 app.use('/events', eventsController);
+app.use('/users', usersController);
 
 
 /* -------------------------------------------
@@ -25,8 +28,6 @@ app.use('/events', eventsController);
  * ------------------------------------------- */
 
 app.use((err, req, res, next) => {
-    console.log(err);
-
     if (err instanceof z.ZodError) {
         const zodErrors = err.issues.map(item => ({ message: `${item.path[0]}: ${item.message}`}))
         return res.status(400).json({ errors: zodErrors});
