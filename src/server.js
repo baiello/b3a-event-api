@@ -6,7 +6,19 @@ const PORT = 3000;
 const app = express();
 const prisma = new PrismaClient();
 
+function requestsLogging(req, res, next) {
+    const requestStartDate = new Date();
+
+    res.once("finish", () => {
+        const requestHandlingTime = new Date() - requestStartDate;
+        console.log(`[${requestStartDate.toISOString()}] ${req.method} ${req.url} - ${requestHandlingTime}ms`);
+    });
+
+    next();
+}
+
 app.use(express.json()); // for parsing application/json
+app.use(requestsLogging);
 
 // Endpoint to create one event
 app.post('/events', async (req, res) => {
