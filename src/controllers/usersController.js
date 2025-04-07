@@ -66,4 +66,32 @@ router.post('/login', async (req, res, next) => {
     }
 });
 
+router.put('/:id', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { firstname, lastname, birthdate, profiles } = req.body;
+
+        const user = await prisma.user.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                firstname,
+                lastname,
+                birthdate,
+                profiles: {
+                    connect: profiles.map(profileId => ({ id: profileId }))
+                },
+            },
+            include: {
+                profiles: true,
+            }
+        });
+
+        return res.status(200).json(user);
+    } catch (error) {
+        next(error);
+    }
+});
+
 module.exports = router;

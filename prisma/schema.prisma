@@ -13,6 +13,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  date        DateTime
+  users       User[]
+}
+
 model User {
   id        Int       @id @default(autoincrement())
   email     String    @unique
@@ -20,13 +28,21 @@ model User {
   firstname String
   lastname  String
   birthdate DateTime
-  events Event[]
+  events    Event[]
+  profiles  Profile[]
 }
 
-model Event {
-  id            Int       @id @default(autoincrement())
-  title         String
-  description   String
-  date          DateTime
-  users  User[]
+model Profile {
+  id          Int          @id @default(autoincrement())
+  name        String
+  description String
+  users       User[]
+  permissions Permission[]
+}
+
+model Permission {
+  id          Int       @id @default(autoincrement())
+  permission  String
+  description String
+  profiles    Profile[]
 }

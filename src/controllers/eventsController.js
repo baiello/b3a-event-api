@@ -7,6 +7,10 @@ const { validateEventCreationInput } = require('../midlewares.js')
 
 // Endpoint to create one event
 router.post('/', validateEventCreationInput, async (req, res) => {
+    if (!req.user.permissions.includes('events.create')) {
+        next('unauthorized');
+    }
+
     try {
         const { title, description, date } = req.body;
 
@@ -25,7 +29,11 @@ router.post('/', validateEventCreationInput, async (req, res) => {
 });
 
 // Endpoint to list all events
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
+    if (!req.user.permissions.includes('events.list')) {
+        next('unauthorized');
+    }
+
     try {
         const events = await prisma.event.findMany();
         return res.status(200).json(events);
@@ -36,6 +44,10 @@ router.get('/', async (req, res) => {
 
 // Endpoint to show one event details
 router.get('/:id', async (req, res) => {
+    if (!req.user.permissions.includes('events.retrieve')) {
+        next('unauthorized');
+    }
+
     try {
         const { id } = req.params;
 
@@ -55,6 +67,10 @@ router.get('/:id', async (req, res) => {
 
 // Endpoint to update one event
 router.put('/:id', async (req, res) => {
+    if (!req.user.permissions.includes('events.update')) {
+        next('unauthorized');
+    }
+
     try {
         const { id } = req.params;
 
@@ -81,6 +97,10 @@ router.put('/:id', async (req, res) => {
 
 // Endpoint to delete one event
 router.delete('/:id', async (req, res) => {
+    if (!req.user.permissions.includes('events.delete')) {
+        next('unauthorized');
+    }
+
     try {
         const { id } = req.params;
 

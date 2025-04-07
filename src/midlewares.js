@@ -27,8 +27,6 @@ function requestsLogging(req, res, next) {
 }
 
 function validateEventCreationInput(req, res, next) {
-    console.log(EventCreationSchema);
-
     EventCreationSchema.parse(req.body);
     next();
 }
