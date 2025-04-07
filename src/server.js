@@ -21,7 +21,6 @@ app.use(requestsLogging);
 app.use(express.json()); // for parsing application/json
 
 
-
 app.use('/events', authMiddleware, eventsController);
 app.use('/users', usersController);
 

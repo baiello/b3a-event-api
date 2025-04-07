@@ -55,7 +55,7 @@ router.post('/login', async (req, res, next) => {
         bcrypt.compare(password, user.password)
             .then(result => {
                 if (result) {
-                    const token = createToken();
+                    const token = createToken({ id: user.id });
                     return res.status(200).json({ token });
                 } else {
                     next(new Error('Incorrect credentials.'));

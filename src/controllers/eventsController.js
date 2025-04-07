@@ -98,4 +98,31 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Endpoint to subscribe a user to one event
+router.post('/:id/join', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const event = await prisma.event.update({
+            where: {
+                id: parseInt(id),
+            },
+            data: {
+                users: {
+                    connect: {
+                        id: req.user.id
+                    },
+                },
+            },
+            include: {
+                users: true, // Include all users in the returned object
+            },
+        });
+
+        return res.status(201).json(event);
+    } catch (error) {
+        next(error);
+    }
+});
+
 module.exports = router;
